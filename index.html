@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geometry Calculator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="card">
+        <div class="logo-box">
+          <div class="logo-mark">S</div>
+          <h1>Sing 8b1</h1>
+        </div>
+        <p class="subtitle">Choose a shape, pick a formula, enter your values, and get the answer instantly.</p>
+
+        <div class="theme-toggle">
+          <span>Theme</span>
+          <button type="button" id="theme-toggle-btn" class="theme-btn">Black</button>
+        </div>
+
+        <form id="calculator-form">
+          <label>
+            Shape
+            <select id="shape">
+              <option value="circle">Circle</option>
+              <option value="triangle">Triangle</option>
+              <option value="rectangle">Rectangle</option>
+              <option value="square">Square</option>
+              <option value="parallelogram">Parallelogram</option>
+              <option value="cone">Cone</option>
+              <option value="cylinder">Cylinder</option>
+              <option value="trapezoid">Trapezoid</option>
+              <option value="pyramid">Pyramid</option>
+              <option value="triangular-pyramid">Triangular Pyramid</option>
+              <option value="cube">Cube</option>
+            </select>
+          </label>
+
+          <label>
+            Formula
+            <select id="formula"></select>
+          </label>
+
+          <label>
+            Input unit
+            <select id="input-unit"></select>
+          </label>
+
+          <label>
+            Output unit
+            <select id="output-unit"></select>
+          </label>
+
+          <div id="input-fields"></div>
+
+          <button type="submit">Calculate</button>
+        </form>
+
+        <div id="result" class="result" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
