@@ -1,5 +1,4 @@
 :root {
-  color-scheme: light;
   --bg: #ffffff;
   --card: #ffffff;
   --text: #0d0d0d;
@@ -7,17 +6,6 @@
   --border: #d1d5db;
   --input-bg: #f7f7f8;
   --accent: #000000;
-  --accent-text: #ffffff;
-}
-
-body.dark-theme {
-  --bg: #0d0d0d;
-  --card: #1a1a1a;
-  --text: #ececf1;
-  --muted: #c5c5d2;
-  --border: #4a4a5a;
-  --input-bg: #2a2a2a;
-  --accent: #10a37f;
   --accent-text: #ffffff;
 }
 
@@ -175,26 +163,6 @@ body.dark-theme button {
   margin-top: 4px;
 }
 
-.theme-toggle {\n  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-bottom: 16px;
-  color: var(--muted);
-}
-
-.theme-btn {
-  width: auto;
-  padding: 8px 14px;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-
-.theme-btn:hover {
-  background: var(--border);
-}
-
 .result {
   margin-top: 18px;
   padding: 14px 16px;
@@ -244,11 +212,46 @@ body.dark-theme button {
   color: var(--card);
 }
 
-body.dark-theme .final-answer {
-  background: #10a37f;
-  color: #ffffff;
-}
-
 label {
   animation: fadeIn 0.5s ease;
+}
+
+.field-with-unit {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.field-with-unit > label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.value-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.unit-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.field-unit {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
 }
