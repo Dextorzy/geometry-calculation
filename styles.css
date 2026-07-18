@@ -6,7 +6,8 @@
   --muted: #565869;
   --border: #d1d5db;
   --input-bg: #f7f7f8;
-  --accent: #0d0d0d;
+  --accent: #000000;
+  --accent-text: #ffffff;
 }
 
 body.dark-theme {
@@ -17,6 +18,7 @@ body.dark-theme {
   --border: #4a4a5a;
   --input-bg: #2a2a2a;
   --accent: #10a37f;
+  --accent-text: #ffffff;
 }
 
 @keyframes fadeIn {
@@ -146,7 +148,7 @@ input:hover {
 button {
   cursor: pointer;
   background: var(--accent);
-  color: var(--card);
+  color: var(--accent-text);
   border: 1px solid var(--border);
   font-weight: 700;
 }
