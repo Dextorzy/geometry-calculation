@@ -23,12 +23,12 @@ const volumeUnits = {
 
 const formulaMeta = {
   circle: {
-    area: { label: 'Area', inputKind: 'length', outputKind: 'area', fields: [{ name: 'radius', label: 'Radius' }] , compute: ({ radius }) => Math.PI * radius * radius },
-    circumference: { label: 'Circumference', inputKind: 'length', outputKind: 'length', fields: [{ name: 'radius', label: 'Radius' }], compute: ({ radius }) => 2 * Math.PI * radius },
-    diameter: { label: 'Diameter', inputKind: 'length', outputKind: 'length', fields: [{ name: 'radius', label: 'Radius' }], compute: ({ radius }) => 2 * radius },
-    radiusFromArea: { label: 'Radius from area', inputKind: 'area', outputKind: 'length', fields: [{ name: 'area', label: 'Area' }], compute: ({ area }) => Math.sqrt(area / Math.PI) },
-    radiusFromCircumference: { label: 'Radius from circumference', inputKind: 'length', outputKind: 'length', fields: [{ name: 'circumference', label: 'Circumference' }], compute: ({ circumference }) => circumference / (2 * Math.PI) },
-    radiusFromDiameter: { label: 'Radius from diameter', inputKind: 'length', outputKind: 'length', fields: [{ name: 'diameter', label: 'Diameter' }], compute: ({ diameter }) => diameter / 2 },
+    area: { label: 'ផ្ទៃក្រឡា Area', inputKind: 'length', outputKind: 'area', fields: [{ name: 'radius', label: 'កាំ Radius' }] , compute: ({ radius }) => Math.PI * radius * radius },
+    circumference: { label: 'រង្វង់ Circumference', inputKind: 'length', outputKind: 'length', fields: [{ name: 'radius', label: 'កាំ Radius' }], compute: ({ radius }) => 2 * Math.PI * radius },
+    diameter: { label: 'អង្កត់ផ្ចិត Diameter', inputKind: 'length', outputKind: 'length', fields: [{ name: 'radius', label: 'កាំ Radius' }], compute: ({ radius }) => 2 * radius },
+    radiusFromArea: { label: 'កាំ Radius from area', inputKind: 'area', outputKind: 'length', fields: [{ name: 'area', label: 'ផ្ទៃក្រឡា Area' }], compute: ({ area }) => Math.sqrt(area / Math.PI) },
+    radiusFromCircumference: { label: 'កាំ Radius from circumference', inputKind: 'length', outputKind: 'length', fields: [{ name: 'circumference', label: 'រង្វង់ Circumference' }], compute: ({ circumference }) => circumference / (2 * Math.PI) },
+    radiusFromDiameter: { label: 'កាំ Radius from diameter', inputKind: 'length', outputKind: 'length', fields: [{ name: 'diameter', label: 'អង្កត់ផ្ចិត Diameter' }], compute: ({ diameter }) => diameter / 2 },
   },
   triangle: {
     areaBaseHeight: { label: 'Area from base and height', inputKind: 'length', outputKind: 'area', fields: [{ name: 'base', label: 'Base' }, { name: 'height', label: 'Height' }], compute: ({ base, height }) => 0.5 * base * height },
@@ -107,6 +107,7 @@ const inputFields = document.getElementById('input-fields');
 const resultBox = document.getElementById('result');
 const form = document.getElementById('calculator-form');
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const shapeDisplay = document.getElementById('shape-display');
 
 function getUnitOptions(kind) {
   return kind === 'volume' ? Object.keys(volumeUnits) : Object.keys(lengthUnits);
@@ -190,6 +191,66 @@ function formatResult(value, unit, kind) {
   return `${value.toFixed(2)} ${unit}`;
 }
 
+function buildSteps(shape, formula, meta, values, inputUnit, outputUnit, rawResult, result) {
+  let steps = '';
+  
+  // Extract English label (remove Khmer part)
+  const englishLabel = meta.label.split(' ').slice(-1)[0] || meta.label;
+  
+  // Build the step display
+  steps += `<div class="step"><strong>Formula:</strong> ${meta.label}</div>`;
+  
+  // Show input values
+  steps += `<div class="step"><strong>Given values:</strong>`;
+  meta.fields.forEach(field => {
+    const englishFieldName = field.label.split(' ').slice(-1)[0] || field.label;
+    steps += `<br>• ${englishFieldName} = ${values[field.name].toFixed(2)} ${inputUnit}`;
+  });
+  steps += `</div>`;
+  
+  // Show calculation
+  steps += `<div class="step"><strong>Calculation:</strong><br>`;
+  
+  // Add formula-specific calculation display
+  if (formula === 'area' && (shape === 'circle')) {
+    steps += `Area = π × radius²<br>Area = π × ${values.radius.toFixed(2)}²<br>Area = ${rawResult.toFixed(2)} ${inputUnit}²`;
+  } else if (formula === 'circumference' && (shape === 'circle')) {
+    steps += `Circumference = 2π × radius<br>Circumference = 2π × ${values.radius.toFixed(2)}<br>Circumference = ${rawResult.toFixed(2)} ${inputUnit}`;
+  } else if (formula === 'area' && (shape === 'rectangle' || shape === 'parallelogram')) {
+    const field1 = meta.fields[0].label.split(' ').slice(-1)[0];
+    const field2 = meta.fields[1].label.split(' ').slice(-1)[0];
+    steps += `Area = ${field1} × ${field2}<br>Area = ${values[meta.fields[0].name].toFixed(2)} × ${values[meta.fields[1].name].toFixed(2)}<br>Area = ${rawResult.toFixed(2)} ${inputUnit}²`;
+  } else if (formula === 'perimeter' && (shape === 'rectangle')) {
+    steps += `Perimeter = 2 × (length + width)<br>Perimeter = 2 × (${values.length.toFixed(2)} + ${values.width.toFixed(2)})<br>Perimeter = ${rawResult.toFixed(2)} ${inputUnit}`;
+  } else if (formula === 'area' && (shape === 'square')) {
+    steps += `Area = side²<br>Area = ${values.side.toFixed(2)}²<br>Area = ${rawResult.toFixed(2)} ${inputUnit}²`;
+  } else if (formula === 'perimeter' && (shape === 'square')) {
+    steps += `Perimeter = 4 × side<br>Perimeter = 4 × ${values.side.toFixed(2)}<br>Perimeter = ${rawResult.toFixed(2)} ${inputUnit}`;
+  } else if (formula === 'volume' && (shape === 'cone')) {
+    steps += `Volume = (1/3) × π × radius² × height<br>Volume = (1/3) × π × ${values.radius.toFixed(2)}² × ${values.height.toFixed(2)}<br>Volume = ${rawResult.toFixed(2)} ${inputUnit}³`;
+  } else if (formula === 'volume' && (shape === 'cylinder')) {
+    steps += `Volume = π × radius² × height<br>Volume = π × ${values.radius.toFixed(2)}² × ${values.height.toFixed(2)}<br>Volume = ${rawResult.toFixed(2)} ${inputUnit}³`;
+  } else if (formula === 'volume' && (shape === 'cube')) {
+    steps += `Volume = side³<br>Volume = ${values.side.toFixed(2)}³<br>Volume = ${rawResult.toFixed(2)} ${inputUnit}³`;
+  } else if (formula === 'volume' && (shape === 'pyramid')) {
+    steps += `Volume = (1/3) × base area × height<br>Volume = (1/3) × ${values.baseArea.toFixed(2)} × ${values.height.toFixed(2)}<br>Volume = ${rawResult.toFixed(2)} ${inputUnit}³`;
+  } else {
+    steps += `Result = ${rawResult.toFixed(2)} ${inputUnit}${meta.outputKind === 'area' ? '²' : meta.outputKind === 'volume' ? '³' : ''}`;
+  }
+  
+  steps += `</div>`;
+  
+  // Show unit conversion if needed
+  if (inputUnit !== outputUnit && (meta.outputKind === 'length' || meta.outputKind === 'area' || meta.outputKind === 'volume')) {
+    steps += `<div class="step"><strong>Unit conversion:</strong><br>${rawResult.toFixed(2)} ${inputUnit}${meta.outputKind === 'area' ? '²' : meta.outputKind === 'volume' ? '³' : ''} = ${result.toFixed(2)} ${outputUnit}${meta.outputKind === 'area' ? '²' : meta.outputKind === 'volume' ? '³' : ''}</div>`;
+  }
+  
+  // Show final answer
+  steps += `<div class="step final-answer"><strong>Final Answer:</strong> ${formatResult(result, outputUnit, meta.outputKind)}</div>`;
+  
+  return steps;
+}
+
 function handleSubmit(event) {
   event.preventDefault();
 
@@ -216,7 +277,9 @@ function handleSubmit(event) {
     result = convertVolume(rawResult, inputUnit, outputUnit);
   }
 
-  resultBox.innerHTML = `<strong>The answer comes out to be</strong> ${formatResult(result, outputUnit, meta.outputKind)}.`;
+  // Build and display step-by-step solution
+  const stepsHTML = buildSteps(shape, formula, meta, values, inputUnit, outputUnit, rawResult, result);
+  resultBox.innerHTML = stepsHTML;
 }
 
 function toggleTheme() {
