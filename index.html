@@ -13,49 +13,39 @@
           <div class="logo-mark">S</div>
           <h1>Sing 8b1</h1>
         </div>
-        <p class="subtitle">Choose a shape, pick a formula, enter your values, and get the answer instantly.</p>
-
-        <div class="theme-toggle">
-          <span>Theme</span>
-          <button type="button" id="theme-toggle-btn" class="theme-btn">Black</button>
-        </div>
+        <p class="subtitle">ជ្រើសរើសរូបរាង ជ្រើសរើសរូបមន្ត បញ្ចូលតម្លៃរបស់អ្នក ហើយទទួលបានចម្លើយភ្លាមៗ Choose a shape, pick a formula, enter your values, and get the answer instantly.</p>
 
         <form id="calculator-form">
           <label>
-            Shape
+            រូបរាង Shape
             <select id="shape">
               <option value="circle">រង្វង់ Circle</option>
               <option value="triangle">ត្រីកោណ Triangle</option>
               <option value="rectangle">ចតុកោណ Rectangle</option>
               <option value="square">ការ៉េ Square</option>
-              <option value="parallelogram">平行四边形 Parallelogram</option>
-              <option value="cone">កោណ Cone</option>
+              <option value="parallelogram">ប្រលេឡូក្រាម Parallelogram</option>
+              <option value="cone">កោន Cone</option>
               <option value="cylinder">ស៊ីលីនដ័រ Cylinder</option>
-              <option value="trapezoid">台形 Trapezoid</option>
-              <option value="pyramid">ពីរ៉ាមីត Pyramid</option>
-              <option value="triangular-pyramid">ត្រីកោណពីរ៉ាមីត Triangular Pyramid</option>
+              <option value="trapezoid">ចតុកោណព្នាយ Trapezoid</option>
+              <option value="pyramid">ពីរ៉ាមីតចតុមុខ Pyramid</option>
+              <option value="triangular-pyramid">ពីរ៉ាមីតត្រីមុខ Triangular Pyramid</option>
               <option value="cube">គូប Cube</option>
             </select>
           </label>
 
           <label>
-            Formula
+            រូបមន្ត Formula
             <select id="formula"></select>
           </label>
 
           <label>
-            Input unit
-            <select id="input-unit"></select>
-          </label>
-
-          <label>
-            Output unit
+            ឯកតាលទ្ធផល Output unit
             <select id="output-unit"></select>
           </label>
 
           <div id="input-fields"></div>
 
-          <button type="submit">Calculate</button>
+          <button type="submit">គណនា Calculate</button>
         </form>
 
         <div id="result" class="result" aria-live="polite"></div>
