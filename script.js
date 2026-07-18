@@ -15,10 +15,8 @@ const volumeUnits = {
   in3: 1.6387064e-5,
   ft3: 0.0283168466,
   yd3: 0.764554858,
-  l: 0.001,
   liter: 0.001,
-  liters: 0.001,
-  water: 0.001,
+  dm3: 0.001,
 };
 
 const formulaMeta = {
@@ -104,12 +102,12 @@ const khmerLabels = {
   triangle: 'ត្រីកោណ',
   rectangle: 'ចតុកោណ',
   square: 'ការ៉េ',
-  parallelogram: 'ចតុកោណស្របគ្នា',
-  cone: 'កោណ',
+  parallelogram: 'ប្រលេឡូក្រាម',
+  cone: 'កោន',
   cylinder: 'ស៊ីលីនដ័រ',
-  trapezoid: 'ចតុកោណលាក់នៃ',
-  pyramid: 'ពីរ៉ាមីត',
-  'triangular-pyramid': 'ត្រីកោណពីរ៉ាមីត',
+  trapezoid: 'ចតុកោណព្នាយ',
+  pyramid: 'ពីរ៉ាមីតចតុមុខ',
+  'triangular-pyramid': 'ពីរ៉ាមីតត្រីមុខ',
   cube: 'គូប',
 };
 
@@ -136,8 +134,6 @@ const outputUnitSelect = document.getElementById('output-unit');
 const inputFields = document.getElementById('input-fields');
 const resultBox = document.getElementById('result');
 const form = document.getElementById('calculator-form');
-const themeToggleBtn = document.getElementById('theme-toggle-btn');
-const shapeDisplay = document.getElementById('shape-display');
 
 function getUnitOptions(kind) {
   return kind === 'volume' ? Object.keys(volumeUnits) : Object.keys(lengthUnits);
@@ -162,18 +158,9 @@ function renderInputs() {
   const shape = shapeSelect.value;
   const formula = formulaSelect.value;
   const meta = formulaMeta[shape][formula];
-  const options = getUnitOptions(meta.inputKind);
   const outputOptions = getUnitOptions(meta.outputKind);
 
-  inputUnitSelect.innerHTML = '';
   outputUnitSelect.innerHTML = '';
-
-  options.forEach((unit) => {
-    const option = document.createElement('option');
-    option.value = unit;
-    option.textContent = unit;
-    inputUnitSelect.appendChild(option);
-  });
 
   outputOptions.forEach((unit) => {
     const option = document.createElement('option');
@@ -184,15 +171,40 @@ function renderInputs() {
 
   inputFields.innerHTML = '';
   meta.fields.forEach((field) => {
+    const fieldContainer = document.createElement('div');
+    fieldContainer.className = 'field-with-unit';
+    
     const label = document.createElement('label');
     label.textContent = field.label;
+    
     const input = document.createElement('input');
     input.type = 'number';
     input.step = 'any';
     input.name = field.name;
     input.placeholder = field.label;
+    input.className = 'value-input';
+    
+    const unitLabel = document.createElement('label');
+    unitLabel.className = 'unit-label';
+    unitLabel.textContent = 'ឯកតា Unit';
+    
+    const unitSelect = document.createElement('select');
+    unitSelect.name = `${field.name}-unit`;
+    unitSelect.className = 'field-unit';
+    
+    const unitOptions = getUnitOptions(field.inputKind || meta.inputKind);
+    unitOptions.forEach((unit) => {
+      const option = document.createElement('option');
+      option.value = unit;
+      option.textContent = unit;
+      unitSelect.appendChild(option);
+    });
+    
     label.appendChild(input);
-    inputFields.appendChild(label);
+    fieldContainer.appendChild(label);
+    fieldContainer.appendChild(unitLabel);
+    fieldContainer.appendChild(unitSelect);
+    inputFields.appendChild(fieldContainer);
   });
 }
 
@@ -213,69 +225,85 @@ function formatResult(value, unit, kind) {
     return `${value.toFixed(2)} ${unit}²`;
   }
   if (kind === 'volume') {
-    if (unit === 'water' || unit === 'l' || unit === 'liter' || unit === 'liters') {
-      return `${value.toFixed(2)} liters of water`;
+    if (unit === 'liter' || unit === 'dm3') {
+      return `${value.toFixed(2)} លីត្រ (liters)`;
     }
     return `${value.toFixed(2)} ${unit}³`;
   }
   return `${value.toFixed(2)} ${unit}`;
 }
 
-function buildSteps(shape, formula, meta, values, inputUnit, outputUnit, rawResult, result) {
+function buildSteps(shape, formula, meta, values, fieldUnits, outputUnit, rawResult, result) {
   let steps = '';
   
   const shapeKh = khmerLabels[shape] || shape;
   const formulaKh = khmerFormulas[formula] || formula;
   
-  steps += `<div class="step"><strong>រូបរាង៖</strong> ${shapeKh}</div>`;
-  steps += `<div class="step"><strong>រូបមន្ត៖</strong> ${meta.label}</div>`;
+  // Title: គណនា[រូបរាង] [រូបមន្ត]
+  steps += `<div class="step"><strong>គណនា${shapeKh} ${formulaKh}</strong></div>`;
   
-  // Show input values
-  steps += `<div class="step"><strong>តម្លៃដែលបានផ្តល់ឱ្យ៖</strong>`;
-  meta.fields.forEach(field => {
+  // Formula: តាមរូបមន្ត
+  steps += `<div class="step"><strong>តាមរូបមន្ត</strong> ${meta.label}</div>`;
+  
+  // Given values: ដោយ field = value [unit], field2 = value2 [unit]
+  let givenText = 'ដោយ ';
+  meta.fields.forEach((field, index) => {
     const englishFieldName = field.label.split(' ').slice(-1)[0] || field.label;
     const khmerFieldName = khmerFormulas[field.name] || englishFieldName;
-    steps += `<br>• ${khmerFieldName} = ${values[field.name].toFixed(2)} ${inputUnit}`;
+    const fieldUnit = fieldUnits[field.name];
+    if (index > 0) givenText += ', ';
+    givenText += `${khmerFieldName} = ${values[field.name].toFixed(2)} ${fieldUnit}`;
   });
-  steps += `</div>`;
+  steps += `<div class="step"><strong>${givenText}</strong></div>`;
   
-  // Show calculation
-  steps += `<div class="step"><strong>ការគណនា៖</strong><br>`;
+  // Show unit conversions if any field used different unit
+  let hasConversions = false;
+  let conversionText = 'ការប្រែលេខ៖ ';
+  meta.fields.forEach((field, index) => {
+    const fieldUnit = fieldUnits[field.name];
+    if (fieldUnit !== outputUnit) {
+      hasConversions = true;
+      if (index > 0) conversionText += ', ';
+      conversionText += `${field.name} من ${fieldUnit} إلى ${outputUnit}`;
+    }
+  });
+  if (hasConversions) {
+    steps += `<div class="step"><strong>${conversionText}</strong></div>`;
+  }
   
-  // Add formula-specific calculation display in Khmer
-  if (formula === 'area' && (shape === 'circle')) {
-    steps += `ផ្ទៃក្រឡា = π × កាំ²<br>ផ្ទៃក្រឡា = π × ${values.radius.toFixed(2)}²<br>ផ្ទៃក្រឡា = ${rawResult.toFixed(2)} ${inputUnit}²`;
-  } else if (formula === 'circumference' && (shape === 'circle')) {
-    steps += `រង្វង់ = 2π × កាំ<br>រង្វង់ = 2π × ${values.radius.toFixed(2)}<br>រង្វង់ = ${rawResult.toFixed(2)} ${inputUnit}`;
+  // Calculation step: យើងបាន [formula with values]
+  let calculationText = 'យើងបាន';
+  if (formula === 'area' && shape === 'circle') {
+    calculationText = `យើងបាន S = π × ${values.radius.toFixed(2)}² = ${rawResult.toFixed(2)}`;
+  } else if (formula === 'circumference' && shape === 'circle') {
+    calculationText = `យើងបាន C = 2π × ${values.radius.toFixed(2)} = ${rawResult.toFixed(2)}`;
   } else if (formula === 'area' && (shape === 'rectangle' || shape === 'parallelogram')) {
-    steps += `ផ្ទៃក្រឡា = មូលដ្ឋាន × កម្ពស់<br>ផ្ទៃក្រឡា = ${values[meta.fields[0].name].toFixed(2)} × ${values[meta.fields[1].name].toFixed(2)}<br>ផ្ទៃក្រឡា = ${rawResult.toFixed(2)} ${inputUnit}²`;
-  } else if (formula === 'perimeter' && (shape === 'rectangle')) {
-    steps += `បរិវេណ = 2 × (ប្រវែង + ទទឹង)<br>បរិវេណ = 2 × (${values.length.toFixed(2)} + ${values.width.toFixed(2)})<br>បរិវេណ = ${rawResult.toFixed(2)} ${inputUnit}`;
-  } else if (formula === 'area' && (shape === 'square')) {
-    steps += `ផ្ទៃក្រឡា = ជ្រុង²<br>ផ្ទៃក្រឡា = ${values.side.toFixed(2)}²<br>ផ្ទៃក្រឡា = ${rawResult.toFixed(2)} ${inputUnit}²`;
-  } else if (formula === 'perimeter' && (shape === 'square')) {
-    steps += `បរិវេណ = 4 × ជ្រុង<br>បរិវេណ = 4 × ${values.side.toFixed(2)}<br>បរិវេណ = ${rawResult.toFixed(2)} ${inputUnit}`;
-  } else if (formula === 'volume' && (shape === 'cone')) {
-    steps += `បរិមាណ = (១/៣) × π × កាំ² × កម្ពស់<br>បរិមាណ = (១/៣) × π × ${values.radius.toFixed(2)}² × ${values.height.toFixed(2)}<br>បរិមាណ = ${rawResult.toFixed(2)} ${inputUnit}³`;
-  } else if (formula === 'volume' && (shape === 'cylinder')) {
-    steps += `បរិមាណ = π × កាំ² × កម្ពស់<br>បរិមាណ = π × ${values.radius.toFixed(2)}² × ${values.height.toFixed(2)}<br>បរិមាណ = ${rawResult.toFixed(2)} ${inputUnit}³`;
-  } else if (formula === 'volume' && (shape === 'cube')) {
-    steps += `បរិមាណ = ជ្រុង³<br>បរិមាណ = ${values.side.toFixed(2)}³<br>បរិមាណ = ${rawResult.toFixed(2)} ${inputUnit}³`;
-  } else if (formula === 'volume' && (shape === 'pyramid')) {
-    steps += `បរិមាណ = (១/៣) × ផ្ទៃមូលដ្ឋាន × កម្ពស់<br>បរិមាណ = (១/៣) × ${values.baseArea.toFixed(2)} × ${values.height.toFixed(2)}<br>បរិមាណ = ${rawResult.toFixed(2)} ${inputUnit}³`;
+    calculationText = `យើងបាន S = ${values[meta.fields[0].name].toFixed(2)} × ${values[meta.fields[1].name].toFixed(2)} = ${rawResult.toFixed(2)}`;
+  } else if (formula === 'perimeter' && shape === 'rectangle') {
+    calculationText = `យើងបាន P = 2 × (${values.length.toFixed(2)} + ${values.width.toFixed(2)}) = ${rawResult.toFixed(2)}`;
+  } else if (formula === 'area' && shape === 'square') {
+    calculationText = `យើងបាន S = ${values.side.toFixed(2)}² = ${rawResult.toFixed(2)}`;
+  } else if (formula === 'perimeter' && shape === 'square') {
+    calculationText = `យើងបាន P = 4 × ${values.side.toFixed(2)} = ${rawResult.toFixed(2)}`;
+  } else if (formula === 'volume' && shape === 'cone') {
+    calculationText = `យើងបាន V = (១/៣) × π × ${values.radius.toFixed(2)}² × ${values.height.toFixed(2)} = ${rawResult.toFixed(2)}`;
+  } else if (formula === 'volume' && shape === 'cylinder') {
+    calculationText = `យើងបាន V = π × ${values.radius.toFixed(2)}² × ${values.height.toFixed(2)} = ${rawResult.toFixed(2)}`;
+  } else if (formula === 'volume' && shape === 'cube') {
+    calculationText = `យើងបាន V = ${values.side.toFixed(2)}³ = ${rawResult.toFixed(2)}`;
+  } else if (formula === 'volume' && shape === 'pyramid') {
+    calculationText = `យើងបាន V = (១/៣) × ${values.baseArea.toFixed(2)} × ${values.height.toFixed(2)} = ${rawResult.toFixed(2)}`;
   } else {
-    steps += `លទ្ធផល = ${rawResult.toFixed(2)} ${inputUnit}${meta.outputKind === 'area' ? '²' : meta.outputKind === 'volume' ? '³' : ''}`;
+    calculationText = `យើងបាន លទ្ធផល = ${rawResult.toFixed(2)}`;
   }
+  steps += `<div class="step"><strong>${calculationText}</strong></div>`;
   
-  steps += `</div>`;
-  
-  // Show unit conversion if needed
-  if (inputUnit !== outputUnit && (meta.outputKind === 'length' || meta.outputKind === 'area' || meta.outputKind === 'volume')) {
-    steps += `<div class="step"><strong>ការប្រែលេខ៖</strong><br>${rawResult.toFixed(2)} ${inputUnit}${meta.outputKind === 'area' ? '²' : meta.outputKind === 'volume' ? '³' : ''} = ${result.toFixed(2)} ${outputUnit}${meta.outputKind === 'area' ? '²' : meta.outputKind === 'volume' ? '³' : ''}</div>`;
-  }
-  
-  // Show final answer
-  steps += `<div class="step final-answer"><strong>ចម្លើយចុងក្រោយ៖</strong> ${formatResult(result, outputUnit, meta.outputKind)}</div>`;
+  // Final answer: ដូចនេះ [shape] [formula] ស្មើនឹង [answer]
+  const unitSuffix = meta.outputKind === 'area' ? '²' : meta.outputKind === 'volume' ? '³' : '';
+  const answerText = meta.outputKind === 'volume' && (outputUnit === 'liter' || outputUnit === 'dm3') 
+    ? `${result.toFixed(2)} លីត្រ`
+    : `${result.toFixed(2)} ${outputUnit}${unitSuffix}`;
+  steps += `<div class="step final-answer"><strong>ដូចនេះ ${shapeKh} ${formulaKh} ស្មើនឹង ${answerText}</strong></div>`;
   
   return steps;
 }
@@ -286,40 +314,48 @@ function handleSubmit(event) {
   const shape = shapeSelect.value;
   const formula = formulaSelect.value;
   const meta = formulaMeta[shape][formula];
-  const inputUnit = inputUnitSelect.value;
   const outputUnit = outputUnitSelect.value;
 
+  // Collect values with their individual units
   const values = {};
+  const fieldUnits = {};
   const fieldInputs = inputFields.querySelectorAll('input');
+  
   fieldInputs.forEach((input) => {
-    values[input.name] = parseFloat(input.value);
+    const fieldName = input.name;
+    const fieldValue = parseFloat(input.value);
+    const fieldUnit = document.querySelector(`select[name="${fieldName}-unit"]`).value;
+    
+    fieldUnits[fieldName] = fieldUnit;
+    
+    // Convert field value to output unit based on the field's input kind
+    const field = meta.fields.find(f => f.name === fieldName);
+    const fieldInputKind = field?.inputKind || meta.inputKind;
+    
+    if (fieldInputKind === 'length' && fieldUnit !== outputUnit) {
+      values[fieldName] = convertLength(fieldValue, fieldUnit, outputUnit);
+    } else if (fieldInputKind === 'area' && fieldUnit !== outputUnit) {
+      values[fieldName] = convertArea(fieldValue, fieldUnit, outputUnit);
+    } else if (fieldInputKind === 'volume' && fieldUnit !== outputUnit) {
+      values[fieldName] = convertVolume(fieldValue, fieldUnit, outputUnit);
+    } else {
+      values[fieldName] = fieldValue;
+    }
   });
 
+  // Compute result
   const rawResult = meta.compute(values);
-  let result;
-
-  if (meta.outputKind === 'length') {
-    result = convertLength(rawResult, inputUnit, outputUnit);
-  } else if (meta.outputKind === 'area') {
-    result = convertArea(rawResult, inputUnit, outputUnit);
-  } else {
-    result = convertVolume(rawResult, inputUnit, outputUnit);
-  }
+  
+  // Result is already in output unit because inputs were converted
+  const result = rawResult;
 
   // Build and display step-by-step solution
-  const stepsHTML = buildSteps(shape, formula, meta, values, inputUnit, outputUnit, rawResult, result);
+  const stepsHTML = buildSteps(shape, formula, meta, values, fieldUnits, outputUnit, rawResult, result);
   resultBox.innerHTML = stepsHTML;
-}
-
-function toggleTheme() {
-  document.body.classList.toggle('dark-theme');
-  const isDark = document.body.classList.contains('dark-theme');
-  themeToggleBtn.textContent = isDark ? 'White' : 'Black';
 }
 
 shapeSelect.addEventListener('change', populateFormulaOptions);
 formulaSelect.addEventListener('change', renderInputs);
 form.addEventListener('submit', handleSubmit);
-themeToggleBtn.addEventListener('click', toggleTheme);
 
 populateFormulaOptions();
