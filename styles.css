@@ -2,21 +2,55 @@
   color-scheme: light;
   --bg: #ffffff;
   --card: #ffffff;
-  --text: #000000;
-  --muted: #444444;
-  --border: #000000;
-  --input-bg: #ffffff;
-  --accent: #000000;
+  --text: #0d0d0d;
+  --muted: #565869;
+  --border: #d1d5db;
+  --input-bg: #f7f7f8;
+  --accent: #0d0d0d;
 }
 
 body.dark-theme {
-  --bg: #000000;
-  --card: #000000;
-  --text: #ffffff;
-  --muted: #bfbfbf;
-  --border: #ffffff;
-  --input-bg: #000000;
-  --accent: #ffffff;
+  --bg: #0d0d0d;
+  --card: #1a1a1a;
+  --text: #ececf1;
+  --muted: #c5c5d2;
+  --border: #4a4a5a;
+  --input-bg: #2a2a2a;
+  --accent: #10a37f;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 * {
@@ -40,13 +74,14 @@ body {
 }
 
 .card {
-  width: min(700px, 100%);
-  background: var(--card);
+  width: min(700px, 100%);\n  background: var(--card);
   border: 1px solid var(--border);
   border-radius: 24px;
   padding: 28px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.6s ease;
 }
+
 
 .logo-box {
   display: flex;
@@ -99,6 +134,13 @@ button {
   background: var(--input-bg);
   color: var(--text);
   font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+select:hover,
+input:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
 }
 
 button {
@@ -107,12 +149,23 @@ button {
   color: var(--card);
   border: 1px solid var(--border);
   font-weight: 700;
-  transition: transform 0.15s ease;
 }
 
 button:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
+
+button:active {
+  animation: pulse 0.2s ease;
+}
+
+body.dark-theme button {
+  background: #10a37f;
+  color: #ffffff;
+  border: 1px solid #10a37f;
+}
+
 
 #input-fields {
   display: grid;
@@ -120,8 +173,7 @@ button:hover {
   margin-top: 4px;
 }
 
-.theme-toggle {
-  display: flex;
+.theme-toggle {\n  display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
@@ -132,16 +184,69 @@ button:hover {
 .theme-btn {
   width: auto;
   padding: 8px 14px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.theme-btn:hover {
+  background: var(--border);
 }
 
 .result {
   margin-top: 18px;
   padding: 14px 16px;
   border-radius: 16px;
-  background: var(--card);
+  background: var(--input-bg);
   border: 1px solid var(--border);
   min-height: 56px;
   display: grid;
-  align-items: center;
+  align-items: start;
   color: var(--text);
+  animation: slideUp 0.4s ease;
+}
+
+.step {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  line-height: 1.6;
+  font-size: 0.95em;
+}
+
+.step strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.step br {
+  content: '';
+}
+
+.step br::after {
+  content: '';
+}
+
+.final-answer {
+  background: var(--accent);
+  color: var(--card);
+  border: none;
+  font-weight: 600;
+  margin-top: 16px;
+  padding: 14px 16px;
+}
+
+.final-answer strong {
+  color: var(--card);
+}
+
+body.dark-theme .final-answer {
+  background: #10a37f;
+  color: #ffffff;
+}
+
+label {
+  animation: fadeIn 0.5s ease;
 }
