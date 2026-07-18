@@ -99,6 +99,36 @@ const formulaMeta = {
   },
 };
 
+const khmerLabels = {
+  circle: 'រង្វង់',
+  triangle: 'ត្រីកោណ',
+  rectangle: 'ចតុកោណ',
+  square: 'ការ៉េ',
+  parallelogram: 'ចតុកោណស្របគ្នា',
+  cone: 'កោណ',
+  cylinder: 'ស៊ីលីនដ័រ',
+  trapezoid: 'ចតុកោណលាក់នៃ',
+  pyramid: 'ពីរ៉ាមីត',
+  'triangular-pyramid': 'ត្រីកោណពីរ៉ាមីត',
+  cube: 'គូប',
+};
+
+const khmerFormulas = {
+  area: 'ផ្ទៃក្រឡា',
+  volume: 'បរិមាណ',
+  circumference: 'រង្វង់',
+  perimeter: 'បរិវេណ',
+  diameter: 'អង្កត់ផ្ចិត',
+  surfaceArea: 'ផ្ទៃលេខ័ន្ទ',
+  lateralArea: 'ផ្ទៃក្រោយ',
+  slantHeight: 'កម្ពស់ដេក',
+  height: 'កម្ពស់',
+  radius: 'កាំ',
+  side: 'ជ្រុង',
+  base: 'មូលដ្ឋាន',
+  diagonal: 'អង្កត់ទ្រូង',
+};
+
 const shapeSelect = document.getElementById('shape');
 const formulaSelect = document.getElementById('formula');
 const inputUnitSelect = document.getElementById('input-unit');
@@ -194,59 +224,58 @@ function formatResult(value, unit, kind) {
 function buildSteps(shape, formula, meta, values, inputUnit, outputUnit, rawResult, result) {
   let steps = '';
   
-  // Extract English label (remove Khmer part)
-  const englishLabel = meta.label.split(' ').slice(-1)[0] || meta.label;
+  const shapeKh = khmerLabels[shape] || shape;
+  const formulaKh = khmerFormulas[formula] || formula;
   
-  // Build the step display
-  steps += `<div class="step"><strong>Formula:</strong> ${meta.label}</div>`;
+  steps += `<div class="step"><strong>រូបរាង៖</strong> ${shapeKh}</div>`;
+  steps += `<div class="step"><strong>រូបមន្ត៖</strong> ${meta.label}</div>`;
   
   // Show input values
-  steps += `<div class="step"><strong>Given values:</strong>`;
+  steps += `<div class="step"><strong>តម្លៃដែលបានផ្តល់ឱ្យ៖</strong>`;
   meta.fields.forEach(field => {
     const englishFieldName = field.label.split(' ').slice(-1)[0] || field.label;
-    steps += `<br>• ${englishFieldName} = ${values[field.name].toFixed(2)} ${inputUnit}`;
+    const khmerFieldName = khmerFormulas[field.name] || englishFieldName;
+    steps += `<br>• ${khmerFieldName} = ${values[field.name].toFixed(2)} ${inputUnit}`;
   });
   steps += `</div>`;
   
   // Show calculation
-  steps += `<div class="step"><strong>Calculation:</strong><br>`;
+  steps += `<div class="step"><strong>ការគណនា៖</strong><br>`;
   
-  // Add formula-specific calculation display
+  // Add formula-specific calculation display in Khmer
   if (formula === 'area' && (shape === 'circle')) {
-    steps += `Area = π × radius²<br>Area = π × ${values.radius.toFixed(2)}²<br>Area = ${rawResult.toFixed(2)} ${inputUnit}²`;
+    steps += `ផ្ទៃក្រឡា = π × កាំ²<br>ផ្ទៃក្រឡា = π × ${values.radius.toFixed(2)}²<br>ផ្ទៃក្រឡា = ${rawResult.toFixed(2)} ${inputUnit}²`;
   } else if (formula === 'circumference' && (shape === 'circle')) {
-    steps += `Circumference = 2π × radius<br>Circumference = 2π × ${values.radius.toFixed(2)}<br>Circumference = ${rawResult.toFixed(2)} ${inputUnit}`;
+    steps += `រង្វង់ = 2π × កាំ<br>រង្វង់ = 2π × ${values.radius.toFixed(2)}<br>រង្វង់ = ${rawResult.toFixed(2)} ${inputUnit}`;
   } else if (formula === 'area' && (shape === 'rectangle' || shape === 'parallelogram')) {
-    const field1 = meta.fields[0].label.split(' ').slice(-1)[0];
-    const field2 = meta.fields[1].label.split(' ').slice(-1)[0];
-    steps += `Area = ${field1} × ${field2}<br>Area = ${values[meta.fields[0].name].toFixed(2)} × ${values[meta.fields[1].name].toFixed(2)}<br>Area = ${rawResult.toFixed(2)} ${inputUnit}²`;
+    steps += `ផ្ទៃក្រឡា = មូលដ្ឋាន × កម្ពស់<br>ផ្ទៃក្រឡា = ${values[meta.fields[0].name].toFixed(2)} × ${values[meta.fields[1].name].toFixed(2)}<br>ផ្ទៃក្រឡា = ${rawResult.toFixed(2)} ${inputUnit}²`;
   } else if (formula === 'perimeter' && (shape === 'rectangle')) {
-    steps += `Perimeter = 2 × (length + width)<br>Perimeter = 2 × (${values.length.toFixed(2)} + ${values.width.toFixed(2)})<br>Perimeter = ${rawResult.toFixed(2)} ${inputUnit}`;
+    steps += `បរិវេណ = 2 × (ប្រវែង + ទទឹង)<br>បរិវេណ = 2 × (${values.length.toFixed(2)} + ${values.width.toFixed(2)})<br>បរិវេណ = ${rawResult.toFixed(2)} ${inputUnit}`;
   } else if (formula === 'area' && (shape === 'square')) {
-    steps += `Area = side²<br>Area = ${values.side.toFixed(2)}²<br>Area = ${rawResult.toFixed(2)} ${inputUnit}²`;
+    steps += `ផ្ទៃក្រឡា = ជ្រុង²<br>ផ្ទៃក្រឡា = ${values.side.toFixed(2)}²<br>ផ្ទៃក្រឡា = ${rawResult.toFixed(2)} ${inputUnit}²`;
   } else if (formula === 'perimeter' && (shape === 'square')) {
-    steps += `Perimeter = 4 × side<br>Perimeter = 4 × ${values.side.toFixed(2)}<br>Perimeter = ${rawResult.toFixed(2)} ${inputUnit}`;
+    steps += `បរិវេណ = 4 × ជ្រុង<br>បរិវេណ = 4 × ${values.side.toFixed(2)}<br>បរិវេណ = ${rawResult.toFixed(2)} ${inputUnit}`;
   } else if (formula === 'volume' && (shape === 'cone')) {
-    steps += `Volume = (1/3) × π × radius² × height<br>Volume = (1/3) × π × ${values.radius.toFixed(2)}² × ${values.height.toFixed(2)}<br>Volume = ${rawResult.toFixed(2)} ${inputUnit}³`;
+    steps += `បរិមាណ = (១/៣) × π × កាំ² × កម្ពស់<br>បរិមាណ = (១/៣) × π × ${values.radius.toFixed(2)}² × ${values.height.toFixed(2)}<br>បរិមាណ = ${rawResult.toFixed(2)} ${inputUnit}³`;
   } else if (formula === 'volume' && (shape === 'cylinder')) {
-    steps += `Volume = π × radius² × height<br>Volume = π × ${values.radius.toFixed(2)}² × ${values.height.toFixed(2)}<br>Volume = ${rawResult.toFixed(2)} ${inputUnit}³`;
+    steps += `បរិមាណ = π × កាំ² × កម្ពស់<br>បរិមាណ = π × ${values.radius.toFixed(2)}² × ${values.height.toFixed(2)}<br>បរិមាណ = ${rawResult.toFixed(2)} ${inputUnit}³`;
   } else if (formula === 'volume' && (shape === 'cube')) {
-    steps += `Volume = side³<br>Volume = ${values.side.toFixed(2)}³<br>Volume = ${rawResult.toFixed(2)} ${inputUnit}³`;
+    steps += `បរិមាណ = ជ្រុង³<br>បរិមាណ = ${values.side.toFixed(2)}³<br>បរិមាណ = ${rawResult.toFixed(2)} ${inputUnit}³`;
   } else if (formula === 'volume' && (shape === 'pyramid')) {
-    steps += `Volume = (1/3) × base area × height<br>Volume = (1/3) × ${values.baseArea.toFixed(2)} × ${values.height.toFixed(2)}<br>Volume = ${rawResult.toFixed(2)} ${inputUnit}³`;
+    steps += `បរិមាណ = (១/៣) × ផ្ទៃមូលដ្ឋាន × កម្ពស់<br>បរិមាណ = (១/៣) × ${values.baseArea.toFixed(2)} × ${values.height.toFixed(2)}<br>បរិមាណ = ${rawResult.toFixed(2)} ${inputUnit}³`;
   } else {
-    steps += `Result = ${rawResult.toFixed(2)} ${inputUnit}${meta.outputKind === 'area' ? '²' : meta.outputKind === 'volume' ? '³' : ''}`;
+    steps += `លទ្ធផល = ${rawResult.toFixed(2)} ${inputUnit}${meta.outputKind === 'area' ? '²' : meta.outputKind === 'volume' ? '³' : ''}`;
   }
   
   steps += `</div>`;
   
   // Show unit conversion if needed
   if (inputUnit !== outputUnit && (meta.outputKind === 'length' || meta.outputKind === 'area' || meta.outputKind === 'volume')) {
-    steps += `<div class="step"><strong>Unit conversion:</strong><br>${rawResult.toFixed(2)} ${inputUnit}${meta.outputKind === 'area' ? '²' : meta.outputKind === 'volume' ? '³' : ''} = ${result.toFixed(2)} ${outputUnit}${meta.outputKind === 'area' ? '²' : meta.outputKind === 'volume' ? '³' : ''}</div>`;
+    steps += `<div class="step"><strong>ការប្រែលេខ៖</strong><br>${rawResult.toFixed(2)} ${inputUnit}${meta.outputKind === 'area' ? '²' : meta.outputKind === 'volume' ? '³' : ''} = ${result.toFixed(2)} ${outputUnit}${meta.outputKind === 'area' ? '²' : meta.outputKind === 'volume' ? '³' : ''}</div>`;
   }
   
   // Show final answer
-  steps += `<div class="step final-answer"><strong>Final Answer:</strong> ${formatResult(result, outputUnit, meta.outputKind)}</div>`;
+  steps += `<div class="step final-answer"><strong>ចម្លើយចុងក្រោយ៖</strong> ${formatResult(result, outputUnit, meta.outputKind)}</div>`;
   
   return steps;
 }
